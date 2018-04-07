@@ -94,7 +94,7 @@ public class Game extends Application {
                 ArrayList<Character> col = new ArrayList<>();
 
                 if(j>=2) {
-                    for (int k = 0; k <= 4; k++) {
+                    for (int k = 0; k <= 4; ++k) {
                         String card;
                         card = shuffleDeck.get(j - k);
                         num.add(k, card.charAt(0));
@@ -122,8 +122,8 @@ public class Game extends Application {
 
                     case "4":
                         if(num.get(1) == num.get(2) || col.get(1) == col.get(2)){
-                            shuffleDeck.set(j - 2, shuffleDeck.get(j - 1));
-                            shuffleDeck.remove(j - 1);
+                            cardStrings.set(j - 2, shuffleDeck.get(j - 1));
+                            cardStrings.remove(j - 1);
                         }else{
                             System.out.println("Can't make that move!");
                         }
@@ -132,8 +132,8 @@ public class Game extends Application {
 
                     case "5":
                         if(num.get(1) == num.get(4) || col.get(1) == col.get(4)) {
-                            shuffleDeck.set(j - 4, shuffleDeck.get(j - 1));
-                            shuffleDeck.remove(j - 1);
+                            cardStrings.set(j - 4, shuffleDeck.get(j - 1));
+                            cardStrings.remove(j - 1);
                         }else{
                             System.out.println("Can't make that move!");
                         }
