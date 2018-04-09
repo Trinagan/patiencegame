@@ -4,6 +4,8 @@
  * @version 2.0
  */
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -18,10 +20,13 @@ import static java.lang.Thread.sleep;
 public class Game extends Application {
 
     private CardTable cardTable;
-    private boolean wk = false;
+    private boolean gameStarted = false;
+    private boolean wrongKey = false;
     private boolean Exit = false;
     private int i = 2;
     private int j = 0;
+
+    private ArrayList<String> cardStrings = new ArrayList<>();
 
     @Override
     public void start(Stage stage) {
@@ -32,35 +37,6 @@ public class Game extends Application {
         // to run this in. DO NOT REMOVE THIS.
         Runnable commandLineTask = () -> {
             // REPLACE THE FOLLOWING EXAMPLE WITH YOUR CODE
-            ArrayList<String> shuffleDeck = new ArrayList<>();
-            ArrayList<String> cardStrings = new ArrayList<>();
-
-            while(i<=10){
-                shuffleDeck.add(i + "c.gif");
-                shuffleDeck.add(i + "d.gif");
-                shuffleDeck.add(i + "h.gif");
-                shuffleDeck.add(i + "s.gif");
-                i++;
-            }
-
-            shuffleDeck.add("jc.gif");
-            shuffleDeck.add("jd.gif");
-            shuffleDeck.add("jh.gif");
-            shuffleDeck.add("js.gif");
-            shuffleDeck.add("qc.gif");
-            shuffleDeck.add("qd.gif");
-            shuffleDeck.add("qh.gif");
-            shuffleDeck.add("qs.gif");
-            shuffleDeck.add("kc.gif");
-            shuffleDeck.add("kd.gif");
-            shuffleDeck.add("kh.gif");
-            shuffleDeck.add("ks.gif");
-            shuffleDeck.add("ac.gif");
-            shuffleDeck.add("ad.gif");
-            shuffleDeck.add("ah.gif");
-            shuffleDeck.add("as.gif");
-
-            Collections.shuffle(shuffleDeck);
 
             while(Exit==false) {
 
@@ -80,11 +56,11 @@ public class Game extends Application {
                 System.out.println("Q - Quit");
                 System.out.println("------------------------------------");
 
-                if(wk){
+                if(wrongKey){
                     System.out.println("Incorrect choice! Try again!");
                 }
 
-                wk=false;
+                wrongKey=false;
 
                 Scanner input = new Scanner(System.in);
 
@@ -93,33 +69,34 @@ public class Game extends Application {
                 ArrayList<Character> num = new ArrayList<>();
                 ArrayList<Character> col = new ArrayList<>();
 
-                if(j>=2) {
-                    for (int k = 0; k <= 2; ++k) {
-                        String card;
-                        card = shuffleDeck.get(j - k);
-                        num.add(k, card.charAt(0));
-                        col.add(k, card.charAt(1));
-                        if(j>=4){
-                            for (k = 2; k <= 4; ++k) {
-                                card = shuffleDeck.get(j - k);
-                                num.add(k, card.charAt(0));
-                                col.add(k, card.charAt(1));
-                            }
-                        }
-                    }
-                }
 
                 switch(menu){
 
                     case "1":
-                        Collections.shuffle(shuffleDeck);
+                        if(gameStarted) {
+                            System.err.println("You can't shuffle the deck once the game has started!");
+                            break;
+                        } else if (!gameStarted){
+                            try {
+                                Cards.shuffle();
+                                Cards.load();
+                            } catch (Exception e){
+                                System.err.println("Cards.txt could not be read.");
+                            }
+                        }
                         break;
 
                     case "2":
-                        cardTable.cardDisplay(shuffleDeck);
-                        System.out.println("Press Enter to go back.");
-                        try{System.in.read();}
-                        catch(Exception e){}
+                        try {
+                            //The method to print the deck
+                            Cards.printer();
+                            cardTable.cardDisplay(Cards.shuffleDeck());
+                            System.out.println("Press Enter to go back.");
+                            try{System.in.read();}
+                            catch(Exception e){}
+                        } catch (Exception e) {
+                            System.out.println(e);
+                        }
                         break;
 
                     case "3":
@@ -175,7 +152,7 @@ public class Game extends Application {
                         break;
 
                     default:
-                        wk=true;
+                        wrongKey=true;
                         break;
 
                 }
