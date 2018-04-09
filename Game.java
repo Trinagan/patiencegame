@@ -94,11 +94,18 @@ public class Game extends Application {
                 ArrayList<Character> col = new ArrayList<>();
 
                 if(j>=2) {
-                    for (int k = 0; k <= 4; ++k) {
+                    for (int k = 0; k <= 2; ++k) {
                         String card;
                         card = shuffleDeck.get(j - k);
                         num.add(k, card.charAt(0));
                         col.add(k, card.charAt(1));
+                        if(j>=4){
+                            for (k = 2; k <= 4; ++k) {
+                                card = shuffleDeck.get(j - k);
+                                num.add(k, card.charAt(0));
+                                col.add(k, card.charAt(1));
+                            }
+                        }
                     }
                 }
 
@@ -109,10 +116,10 @@ public class Game extends Application {
                         break;
 
                     case "2":
-                            cardTable.cardDisplay(shuffleDeck);
-                            System.out.println("Press Enter to go back.");
-                            try{System.in.read();}
-                            catch(Exception e){}
+                        cardTable.cardDisplay(shuffleDeck);
+                        System.out.println("Press Enter to go back.");
+                        try{System.in.read();}
+                        catch(Exception e){}
                         break;
 
                     case "3":
