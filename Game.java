@@ -4,27 +4,32 @@
  * @version 2.0
  */
 
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
+import uk.ac.aber.dcs.cs12320.cards.gui.javafx.CardTable;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import uk.ac.aber.dcs.cs12320.cards.gui.javafx.CardTable;
-
-import static java.lang.Thread.sleep;
 
 public class Game extends Application {
 
-    private CardTable cardTable;
+    private Cards Cards = new Cards();
+
     private boolean gameStarted = false;
     private boolean wrongKey = false;
+    private boolean deckEmpty = false;
+    private boolean deckShuffled = false;
+    private boolean endGame = false;
     private boolean Exit = false;
-    private int i = 2;
-    private int j = 0;
+
+    private String firstCard = null;
+    private String secondCard = null;
+
+    private Integer firstCardPlace = null;
+    private Integer secondCardPlace = null;
+    private Integer cardLocation = 0;
+
+    private CardTable cardTable;
 
     private ArrayList<String> cardStrings = new ArrayList<>();
 
@@ -38,7 +43,7 @@ public class Game extends Application {
         Runnable commandLineTask = () -> {
             // REPLACE THE FOLLOWING EXAMPLE WITH YOUR CODE
 
-            while(Exit==false) {
+            while(!Exit) {
 
                 cardTable.cardDisplay(cardStrings);
 
@@ -66,10 +71,6 @@ public class Game extends Application {
 
                 String menu = input.next();
 
-                ArrayList<Character> num = new ArrayList<>();
-                ArrayList<Character> col = new ArrayList<>();
-
-
                 switch(menu){
 
                     case "1":
@@ -78,10 +79,11 @@ public class Game extends Application {
                             break;
                         } else if (!gameStarted){
                             try {
+                                deckShuffled = true;
                                 Cards.shuffle();
                                 Cards.load();
                             } catch (Exception e){
-                                System.err.println("Cards.txt could not be read.");
+                                System.err.println("Cards.txt could not be read");
                             }
                         }
                         break;
@@ -90,8 +92,8 @@ public class Game extends Application {
                         try {
                             //The method to print the deck
                             Cards.printer();
-                            cardTable.cardDisplay(Cards.shuffleDeck());
-                            System.out.println("Press Enter to go back.");
+                            cardTable.cardDisplay(Cards.printer);
+                            System.out.println("Press Enter to go back");
                             try{System.in.read();}
                             catch(Exception e){}
                         } catch (Exception e) {
@@ -100,36 +102,102 @@ public class Game extends Application {
                         break;
 
                     case "3":
-                        cardStrings.add(shuffleDeck.get(j));
-                        j++;
+                        if (!deckShuffled){
+                            System.err.println("Shuffle the deck first!");
+                        } else if (cardLocation == 52){
+                            deckEmpty = true;
+                        } else if (endGame){
+                            System.out.println("Game over, you can't draw any more cards!");
+                        } else if (deckShuffled && !deckEmpty && !endGame) {
+                            String currentCard = Cards.shuffleDeck[cardLocation];
+                            cardStrings.add(currentCard);
+                            cardLocation++;
+                            gameStarted = true;
+                        } else if (deckEmpty){
+                            System.out.println("All the cards from the deck have been drawn");
+                    }
                         break;
 
                     case "4":
-                        if(num.get(1) == num.get(2) || col.get(1) == col.get(2)){
-                            cardStrings.set(j - 2, shuffleDeck.get(j - 1));
-                            cardStrings.remove(j - 1);
-                        }else{
-                            System.out.println("Can't make that move!");
-                        }
+                        if(!gameStarted){
+                                System.err.println("You can't make a move until you draw a card!");
+                        }else {
+                            try {
+                                firstCard = cardStrings.get(cardStrings.size() - 1);
 
-                        break;
+                                secondCard = cardStrings.get(cardStrings.size() - 2);
+
+                                secondCardPlace = cardStrings.size() - 2;
+
+                                makeMove(secondCardPlace, firstCard, secondCard);
+
+                                break;
+                            } catch (Exception e){
+                                System.err.println("Can't make that move, try drawing another card");
+                                break;
+                            }
+                        }
 
                     case "5":
-                        if(num.get(1) == num.get(4) || col.get(1) == col.get(4)) {
-                            cardStrings.set(j - 4, shuffleDeck.get(j - 1));
-                            cardStrings.remove(j - 1);
-                        }else{
-                            System.out.println("Can't make that move!");
+                        if(!gameStarted){
+                            System.err.println("You can't make a move until you draw a card!");
+                        }else {
+                            try {
+                                firstCard = cardStrings.get(cardStrings.size() - 1);
+
+                                secondCard = cardStrings.get(cardStrings.size() - 3);
+
+                                secondCardPlace = cardStrings.size() - 3;
+
+                                makeMove(secondCardPlace, firstCard, secondCard);
+
+                                break;
+                            } catch (Exception e) {
+                                System.err.println("Can't make that move, try drawing another card");
+                                break;
+                            }
                         }
-                        break;
 
                     case "6":
+                        if (!gameStarted) {
+                            System.err.println("A move can't be made until you draw a card!");
+                            break;
+                        } else {
+                            try {
+                                Scanner amalgamation = new Scanner(System.in);
+                                System.out.println("Which pile would you like to move?");
+                                firstCardPlace = Integer.parseInt(amalgamation.next()) - 1;
+                                firstCard = cardStrings.get(firstCardPlace);
+                                System.out.println("Where would you like that pile to go?");
+                                secondCardPlace = Integer.parseInt(amalgamation.next()) - 1;
+                                secondCard = cardStrings.get(secondCardPlace);
 
-                        break;
+                                if (firstCard == secondCard || firstCardPlace < secondCardPlace) {
+                                    System.err.println("That move is not valid!");
+                                    break;
+                                } else {
+                                    makeMove(secondCardPlace, firstCard, secondCard);
+                                    break;
+                                }
+                            } catch (Exception e) {
+                                System.err.println("That move is not valid!");
+                                break;
+                            }
+                        }
 
                     case "7":
-
-                        break;
+                        if (cardStrings.size() < 1) {
+                            System.out.println("There are no cards on the table!");
+                            break;
+                        } else {
+                            System.out.println("The cards currently on table are:");
+                            for (Integer i = 0; i < cardStrings.size(); i++) {
+                                String card = cardStrings.get(i).replace(".gif", "");
+                                System.out.print(card + "  ");
+                            }
+                            System.out.println();
+                            break;
+                        }
 
                     case "8":
 
@@ -143,7 +211,18 @@ public class Game extends Application {
 
                         break;
 
+                    case "n":
+                        newGame();
+                        cardTable.cardDisplay(cardStrings);
+                        break;
+
+                    case "N":
+                        newGame();
+                        cardTable.cardDisplay(cardStrings);
+                        break;
+
                     case "q":
+                        endGame = true;
                         Exit = true;
                         break;
 
@@ -170,5 +249,36 @@ public class Game extends Application {
         //Game game = new Game();
         //game.playGame();
         Application.launch(args);
+    }
+
+    private void makeMove(Integer cardLocation, String firstCard, String secondCard) {
+        boolean validate = Validation.validateMove(firstCard, secondCard);
+        if (firstCard == null || secondCard == null) {
+            System.err.println("That move is not valid");
+        }else if(!validate){
+            System.err.println("That move is not valid");
+        }else {
+            cardStrings.remove(firstCard);
+            cardStrings.set(cardLocation, firstCard);
+            cardTable.cardDisplay(cardStrings);
+            System.out.println(firstCard.replace(".gif", "") + " was moved over " + secondCard.replace(".gif", ""));
+            nullify();
+        }
+    }
+
+    private void nullify() {
+        firstCard = null;
+        secondCard = null;
+        firstCardPlace = null;
+        secondCardPlace = null;
+    }
+
+    private void newGame() {
+        deckShuffled = false;
+        cardLocation = 0;
+        endGame = false;
+        gameStarted = false;
+        //cardTable.restart();
+        cardStrings.clear();
     }
 }
