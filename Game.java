@@ -4,6 +4,7 @@
  * @version 2.0
  */
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -14,14 +15,17 @@ import javafx.stage.Stage;
 public class Game extends Application {
 
     private Cards Cards = new Cards();
+    private Exit Exit = new Exit();
+    private Scores Scores = new Scores();
 
     private boolean gameStarted = false;
     private boolean wrongKey = false;
     private boolean deckEmpty = false;
     private boolean deckShuffled = false;
     private boolean endGame = false;
-    private boolean Exit = false;
+    private boolean Quit = false;
 
+    private String menu;
     private String firstCard = null;
     private String secondCard = null;
 
@@ -35,6 +39,9 @@ public class Game extends Application {
 
     @Override
     public void start(Stage stage) {
+        try {
+            Scores.loadScores();
+        } catch (Exception e) {}
         cardTable = new CardTable(stage);
 
         // The interaction with this game is from a command line
@@ -43,7 +50,7 @@ public class Game extends Application {
         Runnable commandLineTask = () -> {
             // REPLACE THE FOLLOWING EXAMPLE WITH YOUR CODE
 
-            while(!Exit) {
+            while(!Quit) {
 
                 cardTable.cardDisplay(cardStrings);
 
@@ -69,7 +76,8 @@ public class Game extends Application {
 
                 Scanner input = new Scanner(System.in);
 
-                String menu = input.next();
+                menu = input.next();
+                menu = menu.toUpperCase();
 
                 switch(menu){
 
@@ -208,26 +216,14 @@ public class Game extends Application {
                         break;
 
                     case "10":
-
-                        break;
-
-                    case "n":
-                        newGame();
-                        cardTable.cardDisplay(cardStrings);
-                        break;
-
-                    case "N":
-                        newGame();
-                        cardTable.cardDisplay(cardStrings);
-                        break;
-
-                    case "q":
-                        endGame = true;
-                        Exit = true;
+                        Scores.printScores();
                         break;
 
                     case "Q":
-                        Exit = true;
+                        endGame = true;
+                        Quit = true;
+                        cardTable.allDone();
+                        Exit.exit(cardStrings.size(), cardLocation);
                         break;
 
                     default:
@@ -252,11 +248,11 @@ public class Game extends Application {
     }
 
     private void makeMove(Integer cardLocation, String firstCard, String secondCard) {
-        boolean validate = Validation.validateMove(firstCard, secondCard);
+        boolean check = CardCheck.checkMove(firstCard, secondCard);
         if (firstCard == null || secondCard == null) {
-            System.err.println("That move is not valid");
-        }else if(!validate){
-            System.err.println("That move is not valid");
+            System.err.println("That move can't be made!");
+        }else if (!check) {
+            System.err.println("That move can't be made!");
         }else {
             cardStrings.remove(firstCard);
             cardStrings.set(cardLocation, firstCard);
@@ -273,12 +269,4 @@ public class Game extends Application {
         secondCardPlace = null;
     }
 
-    private void newGame() {
-        deckShuffled = false;
-        cardLocation = 0;
-        endGame = false;
-        gameStarted = false;
-        //cardTable.restart();
-        cardStrings.clear();
-    }
 }

@@ -1,7 +1,4 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,11 +12,7 @@ public class Cards {
     public String[] shuffleDeck;
 
     public void getFile() {
-        if (System.getProperty("user.dir").contains("out")) {
-            cardsPath = System.getProperty("user.dir") + "\\cards.txt";
-        } else {
             cardsPath = System.getProperty("user.dir") + "\\src\\cards.txt";
-        }
     }
 
     public void load() throws FileNotFoundException {

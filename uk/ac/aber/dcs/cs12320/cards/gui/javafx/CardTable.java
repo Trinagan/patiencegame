@@ -91,5 +91,4 @@ public class CardTable {
         box.getChildren().add(iv);
     }
 
-
 }
